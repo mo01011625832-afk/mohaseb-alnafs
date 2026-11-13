@@ -3,17 +3,15 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>مُحاسِب النفس</title>
-
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;padding:18px;
- background:#101310;color:#eee9dc;
- font-family:Tahoma,Arial,sans-serif;
+ margin:0;padding:18px;background:#101310;
+ color:#eee9dc;font-family:Tahoma,Arial,sans-serif;
 }
-header{text-align:center;padding:22px 0}
+header{text-align:center;padding:20px 0}
 h1{color:#c9a96e;font-size:29px}
 h2{color:#c9a96e;font-size:20px}
 p{line-height:1.8}
@@ -22,33 +20,37 @@ button{
  border:1px solid #756343;border-radius:12px;
  padding:13px;font-size:15px;cursor:pointer;
 }
+button:disabled{opacity:.5}
 button:active{background:#62502f}
-.categories,.sins{display:grid;gap:12px;margin:15px 0}
-.categories{grid-template-columns:1fr 1fr}
-.category{min-height:75px;font-weight:bold}
-.sins{grid-template-columns:1fr}
-.sin{text-align:right}
+.hidden{display:none!important}
 .card{
  background:#202620;padding:15px;
  border:1px solid #393d31;border-radius:13px;
  margin:12px 0;
 }
-.hidden{display:none!important}
-.back{margin:10px 0}
+.categories{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.category{min-height:70px;font-weight:bold}
+.sins{display:grid;gap:10px;margin:12px 0}
+.sin{text-align:right;width:100%}
 .gold{color:#c9a96e}
 .small{font-size:12px;color:#aaa}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
+.back{margin:10px 0}
+.actions{display:flex;gap:8px;margin-top:12px}
 .actions button{flex:1}
-input[type=checkbox],input[type=radio]{
- accent-color:#c9a96e;width:18px;height:18px;
+.nav{
+ display:grid;grid-template-columns:1fr 1fr;
+ gap:10px;margin:15px 0;
 }
+.nav button{min-height:55px}
 .step{
  display:flex;align-items:center;gap:10px;
  padding:13px;background:#252b25;
  border-radius:10px;margin:9px 0;
 }
-.success{border-color:#718c65}
-.danger{border-color:#8b614e}
+input[type=checkbox],input[type=radio]{
+ width:19px;height:19px;accent-color:#c9a96e;
+}
+.badge{color:#c9a96e;font-size:13px}
 </style>
 </head>
 
@@ -57,44 +59,53 @@ input[type=checkbox],input[type=radio]{
 <header>
 <h1>مُحاسِب النفس</h1>
 <p class="gold">وَحَاسِبُوا أَنْفُسَكُمْ قَبْلَ أَنْ تُحَاسَبُوا</p>
-<p class="small">رحلة لمحاسبة النفس والإقلاع عن الذنوب</p>
+<p class="small">رحلة لمحاسبة النفس والتوبة إلى الله</p>
 </header>
 
+<!-- الصفحة الرئيسية -->
 <main id="home">
 
 <div class="card">
-<h2>سجل المحاسبة</h2>
+<h2>ملخص المحاسبة</h2>
 <p>الذنوب النشطة: <span class="gold" id="activeCount">0</span></p>
-<p>التوبة والاستغفار: <span class="gold" id="doneCount">0</span></p>
+<p>العمليات المكتملة: <span class="gold" id="doneCount">0</span></p>
+</div>
+
+<div class="nav">
+<button onclick="showActive()">📋 الذنوب النشطة</button>
+<button onclick="showArchive()">📖 سجل التوبة والاستغفار</button>
 </div>
 
 <h2>أقسام الذنوب</h2>
 <div class="categories" id="categories"></div>
 
-<div class="card">
-<h2>سجل التوبة والاستغفار</h2>
-<div id="archive"></div>
-</div>
-
 </main>
 
+<!-- اختيار الذنوب -->
 <section id="section" class="hidden">
-<button class="back" onclick="goHome()">← رجوع</button>
+<button class="back" onclick="goHome()">← الرئيسية</button>
 <h2 id="sectionTitle"></h2>
-
 <h2>الكبائر</h2>
 <div id="major" class="sins"></div>
-
 <h2>الصغائر</h2>
 <div id="minor" class="sins"></div>
 </section>
 
-<section id="repent" class="hidden">
-<button class="back" onclick="backToSection()">← رجوع</button>
+<!-- الذنوب النشطة -->
+<section id="activePage" class="hidden">
+<button class="back" onclick="goHome()">← الرئيسية</button>
+<h2>الذنوب النشطة</h2>
+<p class="small">اختر الإجراء المناسب لكل ذنب.</p>
+<div id="activeList"></div>
+</section>
+
+<!-- خطوات التوبة -->
+<section id="repentPage" class="hidden">
+<button class="back" onclick="showActive()">← رجوع</button>
 <h2>خطوات التوبة</h2>
+
 <div class="card">
 <p>الذنب: <strong id="repentSin" class="gold"></strong></p>
-<p>لاستكمال التوبة، راجع الخطوات التالية:</p>
 
 <div class="step">
 <input type="checkbox" id="step1">
@@ -112,7 +123,7 @@ input[type=checkbox],input[type=radio]{
 </div>
 
 <h2>حقوق العباد</h2>
-<p>إذا كان الذنب متعلقًا بحقوق شخص آخر، فلا بد من رد الحق أو التحلل منه بحسب الحالة.</p>
+<p>إذا كان الذنب متعلقًا بحقوق شخص آخر، فيلزم رد الحق أو التحلل منه بحسب الحالة.</p>
 
 <div class="step">
 <input type="radio" name="rights" id="rightsNo" value="no">
@@ -125,11 +136,15 @@ input[type=checkbox],input[type=radio]{
 </div>
 
 <button style="width:100%;margin-top:15px"
-onclick="completeRepentance()">
-إتمام التوبة
-</button>
-<p class="small">لن ينتقل الذنب إلى سجل التوبة إلا بعد استكمال الخطوات.</p>
+onclick="completeRepentance()">إتمام التوبة</button>
 </div>
+</section>
+
+<!-- سجل العمليات -->
+<section id="archivePage" class="hidden">
+<button class="back" onclick="goHome()">← الرئيسية</button>
+<h2>سجل التوبة والاستغفار</h2>
+<div id="archiveList"></div>
 </section>
 
 <script>
@@ -152,11 +167,36 @@ minor:["التفريط في السنن","التهاون في الأذكار","ت
 }
 };
 
-let records=JSON.parse(localStorage.getItem("mohasabat_records")||"[]");
-let currentCategory="";
-let currentSin="";
-
 const $=id=>document.getElementById(id);
+
+let records=[];
+try{
+ records=JSON.parse(localStorage.getItem("mohasabat_records")||"[]");
+ if(!Array.isArray(records))records=[];
+}catch(e){records=[];}
+
+let currentCategory="";
+let currentRecordId=null;
+
+function save(){
+ localStorage.setItem("mohasabat_records",JSON.stringify(records));
+ render();
+}
+
+function makeId(){
+ return Date.now().toString()+"_"+Math.random().toString(36).slice(2);
+}
+
+function hideAll(){
+ ["home","section","activePage","repentPage","archivePage"]
+ .forEach(id=>$(id).classList.add("hidden"));
+}
+
+function goHome(){
+ hideAll();
+ $("home").classList.remove("hidden");
+ render();
+}
 
 Object.keys(data).forEach(name=>{
  const b=document.createElement("button");
@@ -168,8 +208,7 @@ Object.keys(data).forEach(name=>{
 
 function openSection(name){
  currentCategory=name;
- $("home").classList.add("hidden");
- $("repent").classList.add("hidden");
+ hideAll();
  $("section").classList.remove("hidden");
  $("sectionTitle").textContent=name;
 
@@ -182,52 +221,100 @@ function showSins(id,items,type){
  box.innerHTML="";
 
  items.forEach(sin=>{
-  const b=document.createElement("button");
-  b.className="sin";
-
-  const alreadyActive=records.some(r=>
+  const exists=records.some(r=>
    r.sin===sin && r.category===currentCategory &&
    r.status==="active"
   );
 
-  b.textContent=alreadyActive?"✓ "+sin:"+ "+sin;
-  b.disabled=alreadyActive;
-
-  b.onclick=()=>addSin(currentCategory,type,sin);
+  const b=document.createElement("button");
+  b.className="sin";
+  b.textContent=exists?"✓ "+sin:"+ "+sin;
+  b.disabled=exists;
+  b.onclick=()=>addSin(type,sin);
   box.appendChild(b);
  });
 }
 
-function addSin(category,type,sin){
- if(records.some(r=>r.sin===sin &&
- r.category===category && r.status==="active"))return;
+function addSin(type,sin){
+ const exists=records.some(r=>
+  r.sin===sin && r.category===currentCategory &&
+  r.status==="active"
+ );
+ if(exists)return;
 
  records.push({
-  category,type,sin,
+  id:makeId(),
+  category:currentCategory,
+  type:type,
+  sin:sin,
   status:"active",
   date:new Date().toLocaleString("ar-EG")
  });
 
  save();
- openSection(category);
+ alert("تمت إضافة الذنب إلى قائمة الذنوب النشطة");
+ openSection(currentCategory);
 }
 
-function startRepent(index){
- const r=records[index];
- if(!r || r.status!=="active")return;
+// صفحة الذنوب النشطة
+function showActive(){
+ hideAll();
+ $("activePage").classList.remove("hidden");
 
- currentSin=r.sin;
- currentCategory=r.category;
+ const box=$("activeList");
+ box.innerHTML="";
 
- $("section").classList.add("hidden");
- $("repent").classList.remove("hidden");
+ const active=records.filter(r=>r.status==="active");
+
+ if(active.length===0){
+  box.textContent="لا توجد ذنوب نشطة حاليًا.";
+  return;
+ }
+
+ active.forEach(r=>{
+  const div=document.createElement("div");
+  div.className="card";
+
+  const title=document.createElement("strong");
+  title.textContent=r.sin;
+
+  const info=document.createElement("p");
+  info.className="small";
+  info.textContent=r.category+" — "+r.type;
+
+  const action=document.createElement("button");
+  action.style.width="100%";
+
+  if(r.type==="كبيرة"){
+   action.textContent="ابدأ خطوات التوبة";
+   action.onclick=()=>startRepent(r.id);
+  }else{
+   action.textContent="استغفرت الله";
+   action.onclick=()=>istighfar(r.id);
+  }
+
+  div.append(title,info,action);
+  box.appendChild(div);
+ });
+}
+
+// بدء التوبة
+function startRepent(id){
+ const r=records.find(x=>x.id===id && x.status==="active");
+ if(!r)return;
+
+ currentRecordId=id;
  $("repentSin").textContent=r.sin;
 
  ["step1","step2","step3"].forEach(id=>$(id).checked=false);
  $("rightsNo").checked=false;
  $("rightsYes").checked=false;
+
+ hideAll();
+ $("repentPage").classList.remove("hidden");
 }
 
+// إتمام التوبة
 function completeRepentance(){
  const steps=["step1","step2","step3"];
 
@@ -243,25 +330,21 @@ function completeRepentance(){
   return;
  }
 
- const index=records.findIndex(r=>
-  r.sin===currentSin &&
-  r.category===currentCategory &&
-  r.status==="active"
- );
+ const r=records.find(x=>x.id===currentRecordId && x.status==="active");
+ if(!r)return;
 
- if(index===-1)return;
-
- records[index].status="repented";
- records[index].completedAt=new Date().toLocaleString("ar-EG");
+ r.status="repented";
+ r.completedAt=new Date().toLocaleString("ar-EG");
 
  save();
- alert("تم تسجيل التوبة في سجل المحاسبة.");
- goHome();
+ alert("تم تسجيل التوبة. اختفى الذنب من قائمة الذنوب النشطة.");
+ showActive();
 }
 
-function istighfar(index){
- const r=records[index];
- if(!r || r.status!=="active")return;
+// الاستغفار
+function istighfar(id){
+ const r=records.find(x=>x.id===id && x.status==="active");
+ if(!r)return;
 
  if(!confirm("هل تريد تسجيل الاستغفار عن هذا الذنب؟"))return;
 
@@ -269,11 +352,47 @@ function istighfar(index){
  r.completedAt=new Date().toLocaleString("ar-EG");
 
  save();
+ showActive();
 }
 
-function save(){
- localStorage.setItem("mohasabat_records",JSON.stringify(records));
- render();
+// سجل العمليات المكتملة
+function showArchive(){
+ hideAll();
+ $("archivePage").classList.remove("hidden");
+
+ const box=$("archiveList");
+ box.innerHTML="";
+
+ const done=records.filter(r=>r.status!=="active").reverse();
+
+ if(done.length===0){
+  box.textContent="لا توجد عمليات مكتملة حتى الآن.";
+  return;
+ }
+
+ done.forEach(r=>{
+  const div=document.createElement("div");
+  div.className="card";
+
+  const title=document.createElement("strong");
+  title.textContent=r.sin;
+
+  const status=document.createElement("p");
+  status.className="gold";
+  status.textContent=r.status==="repented"?
+   "✓ تمت التوبة":"✓ تم الاستغفار";
+
+  const info=document.createElement("p");
+  info.className="small";
+  info.textContent=r.category+" — "+r.type;
+
+  const date=document.createElement("p");
+  date.className="small";
+  date.textContent="تاريخ الإجراء: "+(r.completedAt||"غير مسجل");
+
+  div.append(title,status,info,date);
+  box.appendChild(div);
+ });
 }
 
 function render(){
@@ -282,53 +401,10 @@ function render(){
 
  $("activeCount").textContent=active.length;
  $("doneCount").textContent=done.length;
-
- const archive=$("archive");
- archive.innerHTML="";
-
- if(done.length===0){
-  archive.textContent="لا توجد عمليات مسجلة بعد.";
- }
-
- done.slice().reverse().forEach(r=>{
-  const div=document.createElement("div");
-  div.className="card success";
-
-  const title=document.createElement("strong");
-  title.textContent=r.sin;
-
-  const status=document.createElement("p");
-  status.textContent=r.status==="repented"?
-   "✓ تمت التوبة":"✓ تم تسجيل الاستغفار";
-
-  const date=document.createElement("div");
-  date.className="small";
-  date.textContent="القسم: "+r.category+
-   " | "+r.type+
-   " | التاريخ: "+r.completedAt;
-
-  div.append(title,status,date);
-  archive.appendChild(div);
- });
-
- if(!$("section").classList.contains("hidden")){
-  openSection(currentCategory);
- }
-}
-
-function goHome(){
- $("section").classList.add("hidden");
- $("repent").classList.add("hidden");
- $("home").classList.remove("hidden");
-}
-
-function backToSection(){
- $("repent").classList.add("hidden");
- $("section").classList.remove("hidden");
 }
 
 render();
 </script>
 </body>
-  </html>
-  
+            </html>
+            
