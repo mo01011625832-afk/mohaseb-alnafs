@@ -1,13 +1,15 @@
 
 {
-  "name": "سجل الذنوب",
-  "short_name": "سجل الذنوب",
-  "description": "تطبيق لمراجعة النفس وتسجيل الذنوب",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#121212",
-  "orientation": "portrait",
+  "id": "/mohaseb-alnafs/",
+  "name": "مُحاسِب النفس",
+  "short_name": "محاسبة النفس",
+  "description": "تطبيق مُحاسِب النفس، من تصميم مُحَمَّد بْن هَانِي، ابتغاء مرضاة الله، لمحاسبة النفس ومتابعة التوبة والاستغفار.",
   "lang": "ar",
-  "dir": "rtl"
+  "dir": "rtl",
+  "start_url": "/mohaseb-alnafs/",
+  "scope": "/mohaseb-alnafs/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#121212"
 }
