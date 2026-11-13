@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10121b">
+<title>مُحاسِب النفس</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10121b;color:#eee;font-family:Arial,sans-serif;padding:22px}
+header{text-align:center;padding:25px 0}
+h1{color:#d6b779;font-size:30px}
+p{color:#aaa;line-height:1.8}
+.card{background:#1b1e2b;border:1px solid #38394a;border-radius:16px;padding:18px;margin:15px 0}
+h2{font-size:19px;color:#d6b779}
+.items{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:1px solid #665b45;background:#292b38;color:#eee;padding:14px 8px;border-radius:10px;font-size:15px}
+button:active{background:#655438}
+.stats{display:flex;justify-content:space-around;text-align:center}
+.num{font-size:27px;color:#d6b779}
+.entry{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #393a48;padding:12px 0;gap:8px}
+.delete{padding:8px;color:#ff9999;border-color:#704444}
+footer{text-align:center;color:#888;font-size:13px;margin:30px 0}
+</style>
+</head>
+<body>
+<header>
+<div style="font-size:45px">🌙</div>
+<h1>مُحاسِب النفس</h1>
+<p>حاسِب نفسك قبل أن تُحاسَب</p>
+<p>كل يوم فرصة جديدة للتوبة والإصلاح</p>
+</header>
+
+<div class="card stats">
+<div><div class="num" id="count">0</div><small>إجمالي السجل</small></div>
+<div><div class="num" id="today">0</div><small>سجل اليوم</small></div>
+</div>
+
+<div class="card">
+<h2>اختر ما تريد مراجعته</h2>
+<p>اضغط على الفعل لإضافته إلى سجلك الخاص:</p>
+<div class="items" id="sins"></div>
+</div>
+
+<div class="card">
+<h2>سجل محاسبة النفس</h2>
+<div id="records"><p>السجل فارغ حتى الآن.</p></div>
+<button onclick="clearRecords()" style="width:100%;margin-top:15px">مسح السجل بالكامل</button>
+</div>
+
+<footer>
+باب التوبة مفتوح دائماً ❤️<br>
+اجعل محاسبتك لنفسك طريقاً للإصلاح لا لليأس.
+</footer>
+
+<script>
+const sins=[
+"تأخير الصلاة",
+"الغيبة",
+"النميمة",
+"الكذب",
+"النظر المحرم",
+"إضاعة الوقت",
+"عقوق الوالدين",
+"ترك الذكر",
+"سوء الخلق",
+"إيذاء الآخرين"
+];
+
+let records=JSON.parse(localStorage.getItem("mohaseb_records")||"[]");
+const todayDate=()=>new Date().toLocaleDateString("en-CA");
+
+function save(){
+localStorage.setItem("mohaseb_records",JSON.stringify(records));
+render();
+}
+
+function add(name){
+records.unshift({name,date:todayDate(),time:new Date().toLocaleTimeString("ar-EG")});
+save();
+}
+
+function remove(i){
+records.splice(i,1);
+save();
+}
+
+function clearRecords(){
+if(confirm("هل تريد مسح جميع السجلات؟")){
+records=[];
+save();
+}
+}
+
+function render(){
+document.getElementById("count").textContent=records.length;
+document.getElementById("today").textContent=records.filter(x=>x.date===todayDate()).length;
+const area=document.getElementById("records");
+if(!records.length){
+area.innerHTML="<p>السجل فارغ حتى الآن.</p>";
+return;
+}
+area.innerHTML=records.map((r,i)=>`
+<div class="entry">
+<div><b>${r.name}</b><br><small>${r.date} - ${r.time}</small></div>
+<button class="delete" onclick="remove(${i})">حذف</button>
+</div>`).join("");
+}
+
+document.getElementById("sins").innerHTML=sins.map(s=>
+`<button onclick="add('${s}')">${s} ＋</button>`
+).join("");
+
+render();
+</script>
+</body>
+  </html>
+  
