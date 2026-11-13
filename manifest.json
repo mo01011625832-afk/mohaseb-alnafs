@@ -1,0 +1,13 @@
+
+{
+  "name": "سجل الذنوب",
+  "short_name": "سجل الذنوب",
+  "description": "تطبيق لمراجعة النفس وتسجيل الذنوب",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl"
+}
