@@ -2,23 +2,29 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<link rel="icon" type="image/png" href="./icons/icon-192.png">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
- <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#121212">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#121212">
+
 <title>مُحاسِب النفس</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
  margin:0;padding:18px;background:#101310;
  color:#eee9dc;font-family:Tahoma,Arial,sans-serif;
 }
+
 header{text-align:center;padding:20px 0}
 h1{color:#c9a96e;font-size:29px}
 h2{color:#c9a96e;font-size:20px}
 p{line-height:1.8}
+
 button{
  background:#252b25;color:#eee9dc;
  border:1px solid #756343;border-radius:12px;
@@ -26,35 +32,71 @@ button{
 }
 button:disabled{opacity:.5}
 button:active{background:#62502f}
+
 .hidden{display:none!important}
+
 .card{
  background:#202620;padding:15px;
  border:1px solid #393d31;border-radius:13px;
  margin:12px 0;
 }
-.categories{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.categories{
+ display:grid;grid-template-columns:1fr 1fr;gap:12px
+}
+
 .category{min-height:70px;font-weight:bold}
+
 .sins{display:grid;gap:10px;margin:12px 0}
 .sin{text-align:right;width:100%}
+
 .gold{color:#c9a96e}
 .small{font-size:12px;color:#aaa}
 .back{margin:10px 0}
+
 .actions{display:flex;gap:8px;margin-top:12px}
 .actions button{flex:1}
+
 .nav{
  display:grid;grid-template-columns:1fr 1fr;
  gap:10px;margin:15px 0;
 }
 .nav button{min-height:55px}
+
 .step{
  display:flex;align-items:center;gap:10px;
  padding:13px;background:#252b25;
  border-radius:10px;margin:9px 0;
 }
+
 input[type=checkbox],input[type=radio]{
  width:19px;height:19px;accent-color:#c9a96e;
 }
+
 .badge{color:#c9a96e;font-size:13px}
+
+.hadith{
+ color:#c9a96e;
+ text-align:center;
+ font-size:17px;
+ font-weight:bold;
+ line-height:2;
+ background:#252b25;
+ border:1px solid #756343;
+ border-radius:12px;
+ padding:14px;
+ margin:12px 0 18px;
+}
+
+.footer{
+ text-align:center;
+ padding:25px 10px;
+ margin-top:30px;
+ border-top:1px solid #756343;
+ color:#c9a96e;
+ font-size:14px;
+ line-height:2;
+}
 </style>
 </head>
 
@@ -144,10 +186,16 @@ onclick="completeRepentance()">إتمام التوبة</button>
 </div>
 </section>
 
-<!-- سجل العمليات -->
+<!-- سجل العمليات المكتملة -->
 <section id="archivePage" class="hidden">
 <button class="back" onclick="goHome()">← الرئيسية</button>
+
 <h2>سجل التوبة والاستغفار</h2>
+
+<div class="hadith">
+كل بني آدم خطّاء، وخير الخطّائين التوّابون
+</div>
+
 <div id="archiveList"></div>
 </section>
 
@@ -177,10 +225,47 @@ let records=[];
 try{
  records=JSON.parse(localStorage.getItem("mohasabat_records")||"[]");
  if(!Array.isArray(records))records=[];
-}catch(e){records=[];}
+}catch(e){
+ records=[];
+}
 
 let currentCategory="";
 let currentRecordId=null;
+
+// التاريخ اليومي
+function getTodayKey(){
+ const d=new Date();
+ return d.getFullYear()+"-"+
+ String(d.getMonth()+1).padStart(2,"0")+"-"+
+ String(d.getDate()).padStart(2,"0");
+}
+
+// مسح العمليات المكتملة عند بداية يوم جديد
+function cleanupDailyArchive(){
+ const today=getTodayKey();
+ const lastDay=localStorage.getItem("mohasabat_archive_day");
+
+ if(!lastDay){
+  localStorage.setItem("mohasabat_archive_day",today);
+  return false;
+ }
+
+ if(lastDay!==today){
+  records=records.filter(r=>r.status==="active");
+
+  localStorage.setItem(
+   "mohasabat_records",
+   JSON.stringify(records)
+  );
+
+  localStorage.setItem("mohasabat_archive_day",today);
+  return true;
+ }
+
+ return false;
+}
+
+cleanupDailyArchive();
 
 function save(){
  localStorage.setItem("mohasabat_records",JSON.stringify(records));
@@ -244,6 +329,7 @@ function addSin(type,sin){
   r.sin===sin && r.category===currentCategory &&
   r.status==="active"
  );
+
  if(exists)return;
 
  records.push({
@@ -409,20 +495,33 @@ function render(){
 
 render();
 
+// فحص تغيّر اليوم حتى لو البرنامج مفتوح
+setInterval(()=>{
+ if(cleanupDailyArchive()){
+  render();
+
+  if(!$("archivePage").classList.contains("hidden")){
+   showArchive();
+  }
+ }
+},60000);
+
 </script>
 
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js");
-  });
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./service-worker.js");
+ });
 }
 </script>
 
-
-<footer style="text-align:center;padding:25px 10px;margin-top:30px;border-top:1px solid #756343;color:#c9a96e;font-size:14px">
+<footer class="footer">
 إعداد مُحَمَّد بْن هَانِي
+<br>
+<span class="gold">صدقة جارية</span>
 </footer>
-</body>
-</html>
 
+</body>
+ </html>
+ 
