@@ -3,114 +3,329 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#10121b">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>مُحاسِب النفس</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#10121b;color:#eee;font-family:Arial,sans-serif;padding:22px}
-header{text-align:center;padding:25px 0}
-h1{color:#d6b779;font-size:30px}
-p{color:#aaa;line-height:1.8}
-.card{background:#1b1e2b;border:1px solid #38394a;border-radius:16px;padding:18px;margin:15px 0}
-h2{font-size:19px;color:#d6b779}
-.items{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{border:1px solid #665b45;background:#292b38;color:#eee;padding:14px 8px;border-radius:10px;font-size:15px}
-button:active{background:#655438}
-.stats{display:flex;justify-content:space-around;text-align:center}
-.num{font-size:27px;color:#d6b779}
-.entry{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #393a48;padding:12px 0;gap:8px}
-.delete{padding:8px;color:#ff9999;border-color:#704444}
-footer{text-align:center;color:#888;font-size:13px;margin:30px 0}
+body{
+ margin:0;padding:18px;
+ background:#101310;color:#eee9dc;
+ font-family:Tahoma,Arial,sans-serif;
+}
+header{text-align:center;padding:22px 0}
+h1{color:#c9a96e;font-size:29px}
+h2{color:#c9a96e;font-size:20px}
+p{line-height:1.8}
+button{
+ background:#252b25;color:#eee9dc;
+ border:1px solid #756343;border-radius:12px;
+ padding:13px;font-size:15px;cursor:pointer;
+}
+button:active{background:#62502f}
+.categories,.sins{display:grid;gap:12px;margin:15px 0}
+.categories{grid-template-columns:1fr 1fr}
+.category{min-height:75px;font-weight:bold}
+.sins{grid-template-columns:1fr}
+.sin{text-align:right}
+.card{
+ background:#202620;padding:15px;
+ border:1px solid #393d31;border-radius:13px;
+ margin:12px 0;
+}
+.hidden{display:none!important}
+.back{margin:10px 0}
+.gold{color:#c9a96e}
+.small{font-size:12px;color:#aaa}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1}
+input[type=checkbox],input[type=radio]{
+ accent-color:#c9a96e;width:18px;height:18px;
+}
+.step{
+ display:flex;align-items:center;gap:10px;
+ padding:13px;background:#252b25;
+ border-radius:10px;margin:9px 0;
+}
+.success{border-color:#718c65}
+.danger{border-color:#8b614e}
 </style>
 </head>
+
 <body>
+
 <header>
-<div style="font-size:45px">🌙</div>
 <h1>مُحاسِب النفس</h1>
-<p>حاسِب نفسك قبل أن تُحاسَب</p>
-<p>كل يوم فرصة جديدة للتوبة والإصلاح</p>
+<p class="gold">وَحَاسِبُوا أَنْفُسَكُمْ قَبْلَ أَنْ تُحَاسَبُوا</p>
+<p class="small">رحلة لمحاسبة النفس والإقلاع عن الذنوب</p>
 </header>
 
-<div class="card stats">
-<div><div class="num" id="count">0</div><small>إجمالي السجل</small></div>
-<div><div class="num" id="today">0</div><small>سجل اليوم</small></div>
-</div>
+<main id="home">
 
 <div class="card">
-<h2>اختر ما تريد مراجعته</h2>
-<p>اضغط على الفعل لإضافته إلى سجلك الخاص:</p>
-<div class="items" id="sins"></div>
+<h2>سجل المحاسبة</h2>
+<p>الذنوب النشطة: <span class="gold" id="activeCount">0</span></p>
+<p>التوبة والاستغفار: <span class="gold" id="doneCount">0</span></p>
 </div>
+
+<h2>أقسام الذنوب</h2>
+<div class="categories" id="categories"></div>
 
 <div class="card">
-<h2>سجل محاسبة النفس</h2>
-<div id="records"><p>السجل فارغ حتى الآن.</p></div>
-<button onclick="clearRecords()" style="width:100%;margin-top:15px">مسح السجل بالكامل</button>
+<h2>سجل التوبة والاستغفار</h2>
+<div id="archive"></div>
 </div>
 
-<footer>
-باب التوبة مفتوح دائماً ❤️<br>
-اجعل محاسبتك لنفسك طريقاً للإصلاح لا لليأس.
-</footer>
+</main>
+
+<section id="section" class="hidden">
+<button class="back" onclick="goHome()">← رجوع</button>
+<h2 id="sectionTitle"></h2>
+
+<h2>الكبائر</h2>
+<div id="major" class="sins"></div>
+
+<h2>الصغائر</h2>
+<div id="minor" class="sins"></div>
+</section>
+
+<section id="repent" class="hidden">
+<button class="back" onclick="backToSection()">← رجوع</button>
+<h2>خطوات التوبة</h2>
+<div class="card">
+<p>الذنب: <strong id="repentSin" class="gold"></strong></p>
+<p>لاستكمال التوبة، راجع الخطوات التالية:</p>
+
+<div class="step">
+<input type="checkbox" id="step1">
+<label for="step1">الإقلاع عن الذنب وتركه.</label>
+</div>
+
+<div class="step">
+<input type="checkbox" id="step2">
+<label for="step2">الندم على فعل الذنب.</label>
+</div>
+
+<div class="step">
+<input type="checkbox" id="step3">
+<label for="step3">العزم الصادق على عدم العودة إليه.</label>
+</div>
+
+<h2>حقوق العباد</h2>
+<p>إذا كان الذنب متعلقًا بحقوق شخص آخر، فلا بد من رد الحق أو التحلل منه بحسب الحالة.</p>
+
+<div class="step">
+<input type="radio" name="rights" id="rightsNo" value="no">
+<label for="rightsNo">لا يتعلق الذنب بحقوق العباد.</label>
+</div>
+
+<div class="step">
+<input type="radio" name="rights" id="rightsYes" value="yes">
+<label for="rightsYes">تم رد الحقوق أو التحلل منها.</label>
+</div>
+
+<button style="width:100%;margin-top:15px"
+onclick="completeRepentance()">
+إتمام التوبة
+</button>
+<p class="small">لن ينتقل الذنب إلى سجل التوبة إلا بعد استكمال الخطوات.</p>
+</div>
+</section>
 
 <script>
-const sins=[
-"تأخير الصلاة",
-"الغيبة",
-"النميمة",
-"الكذب",
-"النظر المحرم",
-"إضاعة الوقت",
-"عقوق الوالدين",
-"ترك الذكر",
-"سوء الخلق",
-"إيذاء الآخرين"
-];
+const data={
+"العين":{
+major:["النظر إلى العورات","النظر المحرم بشهوة"],
+minor:["النظر إلى ما لا يجوز","إطلاق البصر فيما لا يرضي الله"]
+},
+"اللسان":{
+major:["الكذب","الغيبة","النميمة","شهادة الزور","القذف"],
+minor:["اللغو","الكلام فيما لا فائدة فيه","إيذاء الآخرين بالكلام"]
+},
+"الجوارح":{
+major:["عقوق الوالدين","الظلم","السرقة","الاعتداء على حقوق الآخرين"],
+minor:["إيذاء الآخرين بالفعل","إهمال الأمانة","التقصير في واجبات الآخرين"]
+},
+"العبادات":{
+major:["ترك الصلاة المفروضة عمدًا","الرياء"],
+minor:["التفريط في السنن","التهاون في الأذكار","تضييع بعض النوافل"]
+}
+};
 
-let records=JSON.parse(localStorage.getItem("mohaseb_records")||"[]");
-const todayDate=()=>new Date().toLocaleDateString("en-CA");
+let records=JSON.parse(localStorage.getItem("mohasabat_records")||"[]");
+let currentCategory="";
+let currentSin="";
+
+const $=id=>document.getElementById(id);
+
+Object.keys(data).forEach(name=>{
+ const b=document.createElement("button");
+ b.className="category";
+ b.textContent=name;
+ b.onclick=()=>openSection(name);
+ $("categories").appendChild(b);
+});
+
+function openSection(name){
+ currentCategory=name;
+ $("home").classList.add("hidden");
+ $("repent").classList.add("hidden");
+ $("section").classList.remove("hidden");
+ $("sectionTitle").textContent=name;
+
+ showSins("major",data[name].major,"كبيرة");
+ showSins("minor",data[name].minor,"صغيرة");
+}
+
+function showSins(id,items,type){
+ const box=$(id);
+ box.innerHTML="";
+
+ items.forEach(sin=>{
+  const b=document.createElement("button");
+  b.className="sin";
+
+  const alreadyActive=records.some(r=>
+   r.sin===sin && r.category===currentCategory &&
+   r.status==="active"
+  );
+
+  b.textContent=alreadyActive?"✓ "+sin:"+ "+sin;
+  b.disabled=alreadyActive;
+
+  b.onclick=()=>addSin(currentCategory,type,sin);
+  box.appendChild(b);
+ });
+}
+
+function addSin(category,type,sin){
+ if(records.some(r=>r.sin===sin &&
+ r.category===category && r.status==="active"))return;
+
+ records.push({
+  category,type,sin,
+  status:"active",
+  date:new Date().toLocaleString("ar-EG")
+ });
+
+ save();
+ openSection(category);
+}
+
+function startRepent(index){
+ const r=records[index];
+ if(!r || r.status!=="active")return;
+
+ currentSin=r.sin;
+ currentCategory=r.category;
+
+ $("section").classList.add("hidden");
+ $("repent").classList.remove("hidden");
+ $("repentSin").textContent=r.sin;
+
+ ["step1","step2","step3"].forEach(id=>$(id).checked=false);
+ $("rightsNo").checked=false;
+ $("rightsYes").checked=false;
+}
+
+function completeRepentance(){
+ const steps=["step1","step2","step3"];
+
+ if(!steps.every(id=>$(id).checked)){
+  alert("يرجى استكمال خطوات التوبة الثلاث.");
+  return;
+ }
+
+ const rights=document.querySelector('input[name="rights"]:checked');
+
+ if(!rights){
+  alert("يرجى تحديد موقف حقوق العباد.");
+  return;
+ }
+
+ const index=records.findIndex(r=>
+  r.sin===currentSin &&
+  r.category===currentCategory &&
+  r.status==="active"
+ );
+
+ if(index===-1)return;
+
+ records[index].status="repented";
+ records[index].completedAt=new Date().toLocaleString("ar-EG");
+
+ save();
+ alert("تم تسجيل التوبة في سجل المحاسبة.");
+ goHome();
+}
+
+function istighfar(index){
+ const r=records[index];
+ if(!r || r.status!=="active")return;
+
+ if(!confirm("هل تريد تسجيل الاستغفار عن هذا الذنب؟"))return;
+
+ r.status="istighfar";
+ r.completedAt=new Date().toLocaleString("ar-EG");
+
+ save();
+}
 
 function save(){
-localStorage.setItem("mohaseb_records",JSON.stringify(records));
-render();
-}
-
-function add(name){
-records.unshift({name,date:todayDate(),time:new Date().toLocaleTimeString("ar-EG")});
-save();
-}
-
-function remove(i){
-records.splice(i,1);
-save();
-}
-
-function clearRecords(){
-if(confirm("هل تريد مسح جميع السجلات؟")){
-records=[];
-save();
-}
+ localStorage.setItem("mohasabat_records",JSON.stringify(records));
+ render();
 }
 
 function render(){
-document.getElementById("count").textContent=records.length;
-document.getElementById("today").textContent=records.filter(x=>x.date===todayDate()).length;
-const area=document.getElementById("records");
-if(!records.length){
-area.innerHTML="<p>السجل فارغ حتى الآن.</p>";
-return;
-}
-area.innerHTML=records.map((r,i)=>`
-<div class="entry">
-<div><b>${r.name}</b><br><small>${r.date} - ${r.time}</small></div>
-<button class="delete" onclick="remove(${i})">حذف</button>
-</div>`).join("");
+ const active=records.filter(r=>r.status==="active");
+ const done=records.filter(r=>r.status!=="active");
+
+ $("activeCount").textContent=active.length;
+ $("doneCount").textContent=done.length;
+
+ const archive=$("archive");
+ archive.innerHTML="";
+
+ if(done.length===0){
+  archive.textContent="لا توجد عمليات مسجلة بعد.";
+ }
+
+ done.slice().reverse().forEach(r=>{
+  const div=document.createElement("div");
+  div.className="card success";
+
+  const title=document.createElement("strong");
+  title.textContent=r.sin;
+
+  const status=document.createElement("p");
+  status.textContent=r.status==="repented"?
+   "✓ تمت التوبة":"✓ تم تسجيل الاستغفار";
+
+  const date=document.createElement("div");
+  date.className="small";
+  date.textContent="القسم: "+r.category+
+   " | "+r.type+
+   " | التاريخ: "+r.completedAt;
+
+  div.append(title,status,date);
+  archive.appendChild(div);
+ });
+
+ if(!$("section").classList.contains("hidden")){
+  openSection(currentCategory);
+ }
 }
 
-document.getElementById("sins").innerHTML=sins.map(s=>
-`<button onclick="add('${s}')">${s} ＋</button>`
-).join("");
+function goHome(){
+ $("section").classList.add("hidden");
+ $("repent").classList.add("hidden");
+ $("home").classList.remove("hidden");
+}
+
+function backToSection(){
+ $("repent").classList.add("hidden");
+ $("section").classList.remove("hidden");
+}
 
 render();
 </script>
